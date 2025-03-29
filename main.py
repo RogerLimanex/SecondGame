@@ -10,10 +10,10 @@ player_ship = pygame.image.load('D:/Jogos/AtividadePratica/asset/sprite_nave_peq
 
 enemy_ship = pygame.image.load('D:/Jogos/AtividadePratica/asset/nave_inimiga_pequena.png')
 
-#posição da nave player
-pos_y_player = 435
+# posição da nave player
+pos_y_player = 440
 pos_x_player = 425
-vel_nave_player = 10
+vel_nave_player = 5
 
 loop = True
 
@@ -39,10 +39,18 @@ while loop:
     if keys[pygame.K_RIGHT]:
         pos_x_player += vel_nave_player
 
+    if pos_y_player <= -10:
+        pos_y_player = -10
+    if pos_y_player >= 440:
+        pos_y_player = 440
+    if pos_x_player <= 0:
+        pos_x_player = 0
+    if pos_x_player >= 870:
+        pos_x_player = 870
+
+
     window.blit(background_image, (0, 0))
     window.blit(player_ship, (pos_x_player, pos_y_player))
-    window.blit(enemy_ship, (435, 50))
-
-
+    window.blit(enemy_ship, (440, 50))
 
     pygame.display.update()
