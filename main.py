@@ -26,7 +26,6 @@ shot = pygame.transform.scale(shot, (30, 30))
 # Fonte para exibir a pontuação e vida
 fonte = pygame.font.Font(None, 36)
 
-
 # Função para o menu inicial
 def menu_inicial():
     selecionado = 0  # 0: START, 1: EXIT
@@ -62,30 +61,62 @@ def menu_inicial():
                         pygame.quit()
                         exit()
 
-
 # Função de colisão
-def colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase, pos_x_enemy, pos_y_enemy):
+def colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase):
     global colisao_ocorrida
-
-    # Colisão do player com o inimigo
     if player_rect.colliderect(inimigo_rect) and not colisao_ocorrida:
         vida -= 20  # Reduz 20 pontos de vida ao colidir com o inimigo
         colisao_ocorrida = True
     elif not player_rect.colliderect(inimigo_rect):
         colisao_ocorrida = False
-
-    # Colisão do tiro com o inimigo
     if tiro_alvo and tiro_rect.colliderect(inimigo_rect):
         pontuacao += 1
         proxima_fase -= 1
-        # Reposiciona o inimigo após ser destruído
-        pos_y_enemy = -50  # Coloca o inimigo acima da tela
-        pos_x_enemy = randint(50, 870)  # Novo valor aleatório para a posição X do inimigo
+        pos_y_enemy = -50
+        pos_x_enemy = randint(50, 870)
         tiro_alvo = False
+        pos_y_missil = pos_y_player
+        pos_x_missil = pos_x_player
         som_explosao.play()  # Toca o som da explosão quando o inimigo é destruído
 
-    return tiro_alvo, vida, pontuacao, proxima_fase, pos_x_enemy, pos_y_enemy
+    return tiro_alvo, vida, pontuacao, proxima_fase
 
+# Função para exibir a tela de Game Over
+def game_over(pontuacao):
+    selecionado = 0  # 0: Jogar novamente, 1: Sair
+    while True:
+        janela.fill((0, 0, 0))
+
+        # Mensagem de Game Over
+        mensagem = fonte.render(f'GAME OVER! Sua pontuação: {pontuacao}', True, (255, 0, 0))
+        janela.blit(mensagem, (x // 2 - mensagem.get_width() // 2, y // 2 - 50))
+
+        # Exibe as opções
+        texto_restart = fonte.render('Jogar Novamente', True, (255, 255, 255) if selecionado == 0 else (150, 150, 150))
+        texto_exit = fonte.render('Sair', True, (255, 255, 255) if selecionado == 1 else (150, 150, 150))
+
+        janela.blit(texto_restart, (x // 2 - texto_restart.get_width() // 2, y // 2 + 20))
+        janela.blit(texto_exit, (x // 2 - texto_exit.get_width() // 2, y // 2 + 60))
+
+        pygame.display.update()
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                exit()
+
+            # Navegação com as teclas de seta
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    selecionado = 0
+                elif event.key == pygame.K_DOWN:
+                    selecionado = 1
+                elif event.key == pygame.K_RETURN:  # Tecla Enter
+                    if selecionado == 0:
+                        return "RESTART"
+                    elif selecionado == 1:
+                        pygame.quit()
+                        exit()
 
 # Loop principal do jogo
 def jogo():
@@ -166,7 +197,8 @@ def jogo():
         inimigo_rect = enemy_ship.get_rect(topleft=(pos_x_enemy, pos_y_enemy))
         tiro_rect = shot.get_rect(topleft=(pos_x_missil, pos_y_missil))
 
-        tiro_alvo, vida, pontuacao, proxima_fase, pos_x_enemy, pos_y_enemy = colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase, pos_x_enemy, pos_y_enemy)
+        # Checa colisões
+        tiro_alvo, vida, pontuacao, proxima_fase = colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase)
 
         # Renderiza o fundo e estrelas
         janela.blit(background_image, (0, background_y))
@@ -192,12 +224,10 @@ def jogo():
 
         # Verifica se a vida chegou a 0 e encerra o jogo com a mensagem "Game Over"
         if vida <= 0:
-            janela.fill((0, 0, 0))
-            mensagem = fonte.render('VOCÊ PERDEU! GAME OVER!', True, (255, 0, 0))
-            janela.blit(mensagem, (x // 2 - 200, y // 2))
-            pygame.display.update()
-            pygame.time.delay(3000)  # Exibe a mensagem por 3 segundos
-            loop = False
+            opcao = game_over(pontuacao)
+            if opcao == "RESTART":
+                jogo()
+            break
 
         # Verifica se a próxima fase chegou a 0 e encerra o jogo com mensagem de transição
         if proxima_fase <= 0:
@@ -205,14 +235,8 @@ def jogo():
             mensagem = fonte.render('VOCÊ PASSOU PARA A SEGUNDA FASE!', True, (0, 255, 0))
             janela.blit(mensagem, (x // 2 - 200, y // 2))
             pygame.display.update()
-            pygame.time.delay(3000)
-            loop = False
+            pygame.time.delay(3000)  # Pausa de 3 segundos antes de reiniciar
+            proxima_fase = 30  # Restabelece a próxima fase
 
-
-# Inicia o menu e o jogo
-opcao = menu_inicial()
-
-if opcao == "START":
-    jogo()
-
-pygame.quit()
+menu_inicial()
+jogo()
