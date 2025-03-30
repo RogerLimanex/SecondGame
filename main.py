@@ -132,3 +132,7 @@ tiro_alvo = False
         window.blit(enemy_ship, (440, 50))
 
     pygame.display.update()
+
+print('-=' * 20)
+resultado()
+print('-=' * 20)
