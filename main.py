@@ -5,16 +5,10 @@ from random import randint
 pygame.init()
 pygame.mixer.init()
 
-# Carrega os sons
-som_explosao = pygame.mixer.Sound('D:/Jogos/AtividadePratica/asset/explosao.wav')
-som_tiro = pygame.mixer.Sound('D:/Jogos/AtividadePratica/asset/tiro.wav')
-pygame.mixer.music.load('D:/Jogos/AtividadePratica/asset/musica_fundo.mp3')
-pygame.mixer.music.play(-1, 0.0)  # Reproduz a música em loop
-
 # Configuração da tela
 x, y = (960, 540)
 janela = pygame.display.set_mode([x, y])
-pygame.display.set_caption('Retorno dos Aliens')
+pygame.display.set_caption('Space Shot')
 
 # Carrega imagens (fora do loop principal)
 background_image = pygame.image.load('D:/Jogos/AtividadePratica/asset/space bg game.png')
@@ -25,6 +19,14 @@ shot = pygame.transform.scale(shot, (30, 30))
 
 # Fonte para exibir a pontuação e vida
 fonte = pygame.font.Font(None, 36)
+# Carrega os sons
+som_explosao = pygame.mixer.Sound('D:/Jogos/AtividadePratica/asset/explosao.wav')
+som_tiro = pygame.mixer.Sound('D:/Jogos/AtividadePratica/asset/tiro.wav')
+
+# Função para o menu inicial
+# Carrega as músicas
+pygame.mixer.music.load('D:/Jogos/AtividadePratica/asset/musica_menu.mp3')
+pygame.mixer.music.play(-1, 0.0)  # Reproduz a música do menu em loop
 
 
 # Função para o menu inicial
@@ -57,6 +59,10 @@ def menu_inicial():
                     selecionado = 1
                 elif event.key == pygame.K_RETURN:  # Tecla Enter
                     if selecionado == 0:
+                        pygame.mixer.music.stop()  # Para a música do menu
+                        pygame.mixer.music.load(
+                            'D:/Jogos/AtividadePratica/asset/musica_level1.mp3')  # Carrega a música da fase 1
+                        pygame.mixer.music.play(-1, 0.0)  # Toca a música da fase 1 em loop
                         return "START"
                     elif selecionado == 1:
                         pygame.quit()
