@@ -26,6 +26,7 @@ shot = pygame.transform.scale(shot, (30, 30))
 # Fonte para exibir a pontuação e vida
 fonte = pygame.font.Font(None, 36)
 
+
 # Função para o menu inicial
 def menu_inicial():
     selecionado = 0  # 0: START, 1: EXIT
@@ -61,8 +62,10 @@ def menu_inicial():
                         pygame.quit()
                         exit()
 
+
 # Função de colisão
-def colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase):
+def colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase,
+             pos_x_enemy, pos_y_enemy):
     global colisao_ocorrida
     if player_rect.colliderect(inimigo_rect) and not colisao_ocorrida:
         vida -= 20  # Reduz 20 pontos de vida ao colidir com o inimigo
@@ -72,14 +75,20 @@ def colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_
     if tiro_alvo and tiro_rect.colliderect(inimigo_rect):
         pontuacao += 1
         proxima_fase -= 1
-        pos_y_enemy = -50
-        pos_x_enemy = randint(50, 870)
-        tiro_alvo = False
-        pos_y_missil = pos_y_player
-        pos_x_missil = pos_x_player
-        som_explosao.play()  # Toca o som da explosão quando o inimigo é destruído
 
-    return tiro_alvo, vida, pontuacao, proxima_fase
+        # Atualizando a posição do inimigo após ser atingido
+        pos_y_enemy = -50
+        pos_x_enemy = randint(50, 870)  # Reposicionando o inimigo aleatoriamente
+
+        # Atualizando o estado do tiro
+        tiro_alvo = False
+        pos_y_missil = pos_y_player  # Posicionando o tiro fora da tela ou no estado inicial
+
+        # Reproduz o som de explosão
+        som_explosao.play()
+
+    return tiro_alvo, vida, pontuacao, proxima_fase, pos_x_enemy, pos_y_enemy
+
 
 # Função para exibir a tela de Game Over
 def game_over(pontuacao):
@@ -118,11 +127,12 @@ def game_over(pontuacao):
                         pygame.quit()
                         exit()
 
+
 # Loop principal do jogo
 def jogo():
     # Posições iniciais
     pos_x_player, pos_y_player = 425, 440
-    pos_x_enemy, pos_y_enemy = 50, 0
+    pos_x_enemy, pos_y_enemy = 50, 0  # Inicia as variáveis aqui para evitar o erro
     pos_x_missil, pos_y_missil = pos_x_player, pos_y_player
 
     # Velocidades
@@ -174,7 +184,8 @@ def jogo():
         comandos = pygame.key.get_pressed()
         if comandos[pygame.K_UP] and pos_y_player > 0:
             pos_y_player -= speed_ship_player
-        if comandos[pygame.K_DOWN] and pos_y_player < 440:  # Ajustado para que a nave não ultrapasse a parte inferior da tela
+        if comandos[
+            pygame.K_DOWN] and pos_y_player < 440:  # Ajustado para que a nave não ultrapasse a parte inferior da tela
             pos_y_player += speed_ship_player
         if comandos[pygame.K_LEFT] and pos_x_player > 0:
             pos_x_player -= speed_ship_player
@@ -198,7 +209,10 @@ def jogo():
         tiro_rect = shot.get_rect(topleft=(pos_x_missil, pos_y_missil))
 
         # Checa colisões
-        tiro_alvo, vida, pontuacao, proxima_fase = colisoes(player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase)
+        tiro_alvo, vida, pontuacao, proxima_fase, pos_x_enemy, pos_y_enemy = colisoes(
+            player_rect, inimigo_rect, tiro_rect, tiro_alvo, pos_x_player, pos_y_player, vida, pontuacao, proxima_fase,
+            pos_x_enemy, pos_y_enemy
+        )
 
         # Renderiza o fundo e estrelas
         janela.blit(background_image, (0, background_y))
@@ -237,6 +251,7 @@ def jogo():
             pygame.display.update()
             pygame.time.delay(3000)  # Pausa de 3 segundos antes de reiniciar
             proxima_fase = 30  # Restabelece a próxima fase
+
 
 menu_inicial()
 jogo()
